@@ -7,7 +7,7 @@ import (
 type Seago struct {
 	Addr    string
 	profile bool
-	server  *server.Server
+	*server.Server
 }
 
 func NewSeago(addr string) *Seago {
@@ -19,33 +19,33 @@ func NewSeago(addr string) *Seago {
 
 func (s *Seago) Profile() {
 	s.profile = true
-	s.server.SetProfile(true)
+	s.Server.SetProfile(true)
 }
 
 func (s *Seago) Get(pattern string, hanlder interface{}) {
-	s.server.AddRouter(pattern, "GET", hanlder)
+	s.Server.AddRouter(pattern, "GET", hanlder)
 }
 
 func (s *Seago) Put(pattern string, hanlder interface{}) {
-	s.server.AddRouter(pattern, "PUT", hanlder)
+	s.Server.AddRouter(pattern, "PUT", hanlder)
 }
 
 func (s *Seago) Post(pattern string, hanlder interface{}) {
-	s.server.AddRouter(pattern, "POST", hanlder)
+	s.Server.AddRouter(pattern, "POST", hanlder)
 }
 
 func (s *Seago) Delete(pattern string, hanlder interface{}) {
-	s.server.AddRouter(pattern, "DELETE", hanlder)
+	s.Server.AddRouter(pattern, "DELETE", hanlder)
 }
 
 func (s *Seago) Head(pattern string, hanlder interface{}) {
-	s.server.AddRouter(pattern, "HEAD", hanlder)
+	s.Server.AddRouter(pattern, "HEAD", hanlder)
 }
 
 func (s *Seago) Options(pattern string, hanlder interface{}) {
-	s.server.AddRouter(pattern, "OPTIONS", hanlder)
+	s.Server.AddRouter(pattern, "OPTIONS", hanlder)
 }
 
 func (s *Seago) Run() {
-	s.server.Run(s.Addr)
+	s.Server.Run(s.Addr)
 }

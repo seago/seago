@@ -12,21 +12,27 @@ import (
 )
 
 type Server struct {
-	router   *router.Router
-	Logger   *log.Logger
-	l        net.Listener
-	profiler bool
+	router    *router.Router
+	Logger    *log.Logger
+	l         net.Listener
+	profiler  bool
+	maxMemory int64
 }
 
 func NewServer() *Server {
 	return &Server{
-		router: router.NewRouter(),
-		Logger: log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile),
+		router:    router.NewRouter(),
+		Logger:    log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile),
+		maxMemory: 100 * 1 << 20, //100M
 	}
 }
 
 func (s *Server) SetProfile(is bool) {
 	s.profiler = is
+}
+
+func (s *Server) SetMaxMemory(maxMemory int64) {
+	s.maxMemory = maxMemory
 }
 
 func (s *Server) AddRouter(pattern, method string, handler interface{}) {
@@ -37,7 +43,7 @@ func (s *Server) AddRouter(pattern, method string, handler interface{}) {
 }
 
 func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	s.router.Process(rw, r)
+	s.router.Process(rw, r, s.maxMemory)
 }
 
 func (s *Server) pprof() {

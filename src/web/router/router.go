@@ -43,13 +43,13 @@ func (router *Router) AddRouter(pattern, method string, handler interface{}) err
 	return nil
 }
 
-func (router *Router) Process(rw http.ResponseWriter, r *http.Request) {
+func (router *Router) Process(rw http.ResponseWriter, r *http.Request, maxMemory int64) {
 	ctx := context.NewContext(rw, r)
 	query := r.URL.Query()
 	for k, _ := range query {
 		ctx.SetParam(k, query.Get(k))
 	}
-	err := ctx.ParseForm(int64(2048000))
+	err := ctx.ParseForm(maxMemory)
 	if err != nil {
 		log.Println(err)
 	} else {
