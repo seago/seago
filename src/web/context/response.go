@@ -2,6 +2,7 @@ package context
 
 import (
 	"encoding/json"
+	"mime"
 	"net/http"
 	"strings"
 )
@@ -24,6 +25,20 @@ func (r *Response) SetHeader(key, value string) {
 
 func (r *Response) GetHeader(key string) string {
 	return r.Header().Get(strings.TrimSpace(key))
+}
+
+func (r *Response) SetContentType(ext string) {
+	if !strings.HasPrefix(ext, ".") {
+		ext = "." + ext
+	}
+	var content_type string
+
+	if mtype := mime.TypeByExtension(ext); mtype != "" {
+		content_type = mtype
+	} else {
+		content_type = "application/" + strings.TrimPrefix(ext, ".") + ";charset=utf-8"
+	}
+	r.SetHeader("Content-Type", content_type)
 }
 
 func (r *Response) WriteString(body string) (int, error) {
