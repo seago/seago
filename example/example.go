@@ -41,6 +41,21 @@ func main() {
 
 		return "hello " + test + " " + strconv.Itoa(i)
 	})
+	seago.Get("/", func() string {
+		return `
+			<html encoding="utf-8">
+<head>test file upload</head>
+<body>
+	<form action="http://localhost:8080/test" method="post" enctype="multipart/form-data">
+		test:<input type="text" name="test_post" value="" /><br />
+		id:<input type="text" name="id_post" value="" /><br />
+		<input type="file" name="file" /><br />
+		<input type="submit" name="submit" value="upload" />
+	</form>
+</body>
+</html>
+		`
+	})
 	seago.Run()
 
 }
