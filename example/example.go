@@ -1,10 +1,3 @@
-seago
-=====
-
-A simple framework in golang
-
-##Example
-~~~ go
 package main
 
 import (
@@ -51,4 +44,3 @@ func main() {
 	seago.Run()
 
 }
-~~~
