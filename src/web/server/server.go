@@ -26,7 +26,7 @@ func NewServer() *Server {
 	return &Server{
 		router:    router.NewRouter(),
 		Logger:    log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile),
-		maxMemory: 100 * 1 << 20, //100M
+		maxMemory: 100 << 20, //100M
 	}
 }
 

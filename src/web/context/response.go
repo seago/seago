@@ -33,9 +33,9 @@ func (r *Response) SetContentType(ext string) {
 	var content_type string
 
 	if mtype := mime.TypeByExtension(ext); mtype != "" {
-		content_type = mtype
+		content_type = mtype + "; charset=utf-8"
 	} else {
-		content_type = "application/" + strings.TrimPrefix(ext, ".") + ";charset=utf-8"
+		content_type = "application/" + strings.TrimPrefix(ext, ".") + "; charset=utf-8"
 	}
 	r.SetHeader("Content-Type", content_type)
 }
@@ -44,28 +44,31 @@ func (r *Response) WriteString(body string) (int, error) {
 	return r.Write([]byte(body))
 }
 
-func (r *Response) WriteInternalServerError(b []byte) (int, error) {
+func (r *Response) WriteInternalServerError() {
 	r.WriteHeader(http.StatusInternalServerError)
-	return r.Write(b)
+
 }
 
-func (r *Response) WriteBadRequest(b []byte) (int, error) {
+func (r *Response) BadRequest() {
 	r.WriteHeader(http.StatusBadRequest)
-	return r.Write(b)
 }
 
-func (r *Response) JsonSuccess(v interface{}) (int, error) {
+func (r *Response) JsonSuccess(v interface{}) []byte {
 	b, err := json.Marshal(v)
 	if err != nil {
-		return r.WriteInternalServerError([]byte("json encoding error:" + err.Error()))
+		r.WriteInternalServerError()
+		return []byte("json encoding error:" + err.Error())
 	}
-	return r.Write(b)
+	r.SetContentType("json")
+	return b
 }
 
-func (r *Response) JsonError(v interface{}) (int, error) {
+func (r *Response) JsonError(v interface{}) []byte {
 	b, err := json.Marshal(v)
 	if err != nil {
-		return r.WriteInternalServerError([]byte("json encoding error:" + err.Error()))
+		r.WriteInternalServerError()
+		return []byte("json encoding error:" + err.Error())
 	}
-	return r.WriteBadRequest(b)
+	r.SetContentType("json")
+	return b
 }

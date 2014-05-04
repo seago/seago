@@ -1,6 +1,7 @@
 package main
 
 import (
+	"controllers"
 	"fmt"
 	"io"
 	. "middleware"
@@ -14,9 +15,8 @@ func main() {
 	DefaultMiddleware.Add("test", "test middleware")
 	seago := web.NewSeago(":8080")
 
-	seago.Get("/test", func(ctx *context.Context) string {
-
-		test := ctx.GetParam("test_get").String()
+	//http://localhost:8080/test/Miller
+	seago.Get("/test/:test_get", func(ctx *context.Context, test string) string {
 		i := ctx.GetParam("id_get").Int()
 		return "hello " + test + " " + strconv.Itoa(i) + " " + DefaultMiddleware.Get("test").(string)
 	})
@@ -57,8 +57,9 @@ func main() {
 					</body>
 				</html>`
 	})
+	seago.Get("/ip/:ip", controllers.GetIp) //http://localhost:8080/ip/10.10.10.10
 	seago.Profile()
-	seago.Server.SetMaxMemory(100 * 1 << 20)
+	seago.Server.SetMaxMemory(200 << 20)
 	seago.Run()
 
 }
