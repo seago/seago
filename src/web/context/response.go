@@ -20,11 +20,10 @@ func (r *Response) SetStatus(code int) {
 }
 
 func (r *Response) SetHeader(key, value string) {
-	r.Header().Set(strings.TrimSpace(key), strings.TrimSpace(value))
+	r.Header().Set(key, value)
 }
-
 func (r *Response) GetHeader(key string) string {
-	return r.Header().Get(strings.TrimSpace(key))
+	return r.Header().Get(key)
 }
 
 func (r *Response) SetContentType(ext string) {
