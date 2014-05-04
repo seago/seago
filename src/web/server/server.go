@@ -11,12 +11,15 @@ import (
 	"web/router"
 )
 
+var VERSION = "0.0.1"
+
 type Server struct {
 	router    *router.Router
 	Logger    *log.Logger
 	l         net.Listener
 	profiler  bool
 	maxMemory int64
+	version   string
 }
 
 func NewServer() *Server {
@@ -43,6 +46,7 @@ func (s *Server) AddRouter(pattern, method string, handler interface{}) {
 }
 
 func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Server", "seago "+VERSION)
 	s.router.Process(rw, r, s.maxMemory)
 }
 

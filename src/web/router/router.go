@@ -45,6 +45,7 @@ func (router *Router) AddRouter(pattern, method string, handler interface{}) err
 
 func (router *Router) Process(rw http.ResponseWriter, r *http.Request, maxMemory int64) {
 	ctx := context.NewContext(rw, r)
+	ctx.Response.SetContentType(".html")
 	query := r.URL.Query()
 	for k, _ := range query {
 		ctx.SetParam(k, query.Get(k))
