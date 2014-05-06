@@ -1,6 +1,6 @@
 ## Seago
 
-Seago is a simple web framework. The router package is inspired by web.go and martinit.
+Seago is a simple web framework. The router package is inspired by web.go and martini.
 
 ## Features
 * RESTful support
@@ -82,4 +82,4 @@ go get github.com/seago/seago
 Then run your server:
 
 go run server.go
-You will now have a Martini webserver running on localhost:8080.
+You will now have a Seago webserver running on localhost:8080.
