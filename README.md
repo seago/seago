@@ -11,7 +11,9 @@ Seagois a simple web framework. The router package is inspired by web.go and mar
 * Session support
 * Cache support
 * Middleware support
-##Example
+##Getting Started
+
+After installing Go and setting up your GOPATH, create your first .go file. We'll call it server.go.
 ~~~ go
 package main
 
@@ -77,3 +79,10 @@ func main() {
 
 }
 ~~~
+Then install the Seago package (go 1.1 and greater is required):
+
+go get github.com/seago/seago
+Then run your server:
+
+go run server.go
+You will now have a Martini webserver running on localhost:8080.
