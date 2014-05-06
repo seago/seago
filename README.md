@@ -4,38 +4,37 @@
 
 Seago is a Go Framework.
 
-Seago web package is a simple web framework. The router package is inspired by web.go and martinit.
+Seagois a simple web framework. The router package is inspired by web.go and martinit.
 
 ## Features
-
 * RESTful support
 * Session support
 * Cache support
+* Middleware support
 ##Example
 ~~~ go
 package main
 
 import (
-	"controllers"
 	"fmt"
+	"github.com/seago/seago"
+	"github.com/seago/seago/context"
+	. "github.com/seago/seago/middleware"
 	"io"
-	. "middleware"
 	"os"
 	"strconv"
-	"web"
-	"web/context"
 )
 
 func main() {
 	DefaultMiddleware.Add("test", "test middleware")
-	seago := web.NewSeago(":8080")
+	app := seago.NewSeago(":8080")
 
 	//http://localhost:8080/test/Miller
-	seago.Get("/test/:test_get", func(ctx *context.Context, test string) string {
+	app.Get("/test/:test_get", func(ctx *context.Context, test string) string {
 		i := ctx.GetParam("id_get").Int()
 		return "hello " + test + " " + strconv.Itoa(i) + " " + DefaultMiddleware.Get("test").(string)
 	})
-	seago.Post("/test", func(ctx *context.Context) string {
+	app.Post("/test", func(ctx *context.Context) string {
 		test := ctx.GetParam("test_post").String()
 		i := ctx.GetParam("id_post").Int()
 		file := ctx.File["file"]
@@ -56,7 +55,7 @@ func main() {
 
 		return "hello " + test + " " + strconv.Itoa(i)
 	})
-	seago.Get("/", func() string {
+	app.Get("/", func() string {
 		return `<html>
 					<head>
 					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -72,10 +71,9 @@ func main() {
 					</body>
 				</html>`
 	})
-	seago.Get("/ip/:ip", controllers.GetIp) //http://localhost:8080/ip/10.10.10.10
-	seago.Profile()
-	seago.Server.SetMaxMemory(200 << 20)
-	seago.Run()
+	app.Profile()
+	app.Server.SetMaxMemory(200 << 20)
+	app.Run()
 
 }
 ~~~
