@@ -1,8 +1,16 @@
-seago
-=====
+## Seago
 
-A simple framework in golang
+[![Build Status](https://drone.io/github.com/seago/seago/status.png)](https://drone.io/github.com/seago/seago/latest)
 
+Seago is a Go Framework.
+
+Seago web package is a simple web framework. The router package is inspired by web.go and martinit.
+
+## Features
+
+* RESTful support
+* Session support
+* Cache support
 ##Example
 ~~~ go
 package main

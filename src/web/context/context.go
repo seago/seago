@@ -18,23 +18,14 @@ func NewContext(rw http.ResponseWriter, r *http.Request) *Context {
 	return &Context{r, NewResponse(rw), make(map[string]Value), make(map[string]*multipart.FileHeader)}
 }
 
-/**
- * 获取URL
- */
 func (c *Context) Url() string {
 	return c.Request.URL.String()
 }
 
-/**
- * 获取请求地址
- */
 func (c *Context) Uri() string {
 	return c.Request.RequestURI
 }
 
-/**
- * 获取scheme
- */
 func (c *Context) Scheme() string {
 	if c.Request.URL.Scheme != "" {
 		return c.Request.URL.Scheme
@@ -46,37 +37,22 @@ func (c *Context) Scheme() string {
 
 }
 
-/**
- * 获取request头内容
- */
 func (c *Context) GetHeader(key string) string {
 	return c.Request.Header.Get(key)
 }
 
-/**
- * 获取request的user agent
- */
 func (c *Context) UserAgent() string {
 	return c.GetHeader("USER-AGENT")
 }
 
-/**
- * 获取请求referer
- */
 func (c *Context) Referer() string {
 	return c.GetHeader("REFERER")
 }
 
-/**
- * 获取应用网址
- */
 func (c *Context) Site() string {
 	return c.Scheme() + "://" + c.Host()
 }
 
-/**
- * 获取Host
- */
 func (c *Context) Host() string {
 	if c.Request.Host != "" {
 		hosts := strings.Split(c.Request.Host, ":")
@@ -88,9 +64,6 @@ func (c *Context) Host() string {
 	return "127.0.0.1"
 }
 
-/**
- * 获取客户端IP
- */
 func (c *Context) Ip() string {
 	ip_proxy := c.Proxy()
 	if len(ip_proxy) > 0 && ip_proxy[0] != "" {
@@ -118,9 +91,44 @@ func (c *Context) ParseForm(maxMemory int64) error {
 	return nil
 }
 
+func (c *Context) GetCookie(key string) string {
+	cookie, err := c.Request.Cookie(key)
+	if err != nil {
+		return ""
+	}
+	return cookie.Value
+}
+
 /**
- * 获取代理IP
+* others[0] is cookie path
+* others[1] is cookie domain
+* others[2] is cookie Secure
+* others[3] is cookie httponly
  */
+func (c *Context) SetCookie(key, value string, maxAge int, others ...interface{}) {
+	cookie := &http.Cookie{
+		Name:     key,
+		Value:    value,
+		MaxAge:   maxAge,
+		Path:     "/",
+		Secure:   false,
+		HttpOnly: false,
+	}
+	if len(others) > 0 {
+		cookie.Path = others[0].(string)
+	}
+	if len(others) > 1 {
+		cookie.Domain = others[1].(string)
+	}
+	if len(others) > 2 {
+		cookie.Secure = others[2].(bool)
+	}
+	if len(others) > 3 {
+		cookie.HttpOnly = others[3].(bool)
+	}
+	c.Response.SetHeader("Set-Cookie", cookie.String())
+}
+
 func (c *Context) Proxy() []string {
 	if ip_proxy := c.GetHeader("HTTP_X_FORWARDED_FOR"); ip_proxy != "" {
 		return strings.Split(ip_proxy, ",")
@@ -128,16 +136,10 @@ func (c *Context) Proxy() []string {
 	return []string{}
 }
 
-/**
- * 获取Proto HTTP/1.1
- */
 func (c *Context) Protocol() string {
 	return c.Request.Proto
 }
 
-/**
- * 获取param值
- */
 func (c *Context) GetParam(key string) Value {
 	return c.params[key]
 }
@@ -146,9 +148,6 @@ func (c *Context) SetParam(key, value string) {
 	c.params[key] = Value(value)
 }
 
-/**
- * 检查param值
- */
 func (c *Context) CkeckParam(key string) bool {
 	_, ok := c.params[key]
 

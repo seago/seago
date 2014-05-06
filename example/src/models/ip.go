@@ -9,11 +9,11 @@ import (
 var url = "http://int.dpool.sina.com.cn/iplookup/iplookup.php"
 
 type IpInfo struct {
-	Country  string `json:country`
-	Province string `json:province`
-	City     string `json:city`
-	District string `json:district`
-	Isp      string `json:isp`
+	Country  string `json:"country"`
+	Province string `json:"province"`
+	City     string `json:"city"`
+	District string `json:"district"`
+	Isp      string `json:"isp"`
 }
 
 func GetIp(ip string) (*IpInfo, error) {
