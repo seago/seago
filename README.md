@@ -1,17 +1,16 @@
 ## Seago
 
-[![Build Status](https://drone.io/github.com/seago/seago/status.png)](https://drone.io/github.com/seago/seago/latest)
-
-Seago is a Go Framework.
-
-Seagois a simple web framework. The router package is inspired by web.go and martinit.
+Seago is a simple web framework. The router package is inspired by web.go and martini.
 
 ## Features
 * RESTful support
 * Session support
 * Cache support
 * Middleware support
-##Example
+
+##Getting Started
+
+After installing Go and setting up your GOPATH, create your first .go file. We'll call it server.go.
 ~~~ go
 package main
 
@@ -77,3 +76,12 @@ func main() {
 
 }
 ~~~
+Then install the Seago package (go 1.1 and greater is required):
+~~~
+go get github.com/seago/seago
+~~~
+Then run your server:
+~~~
+go run server.go
+~~~
+You will now have a Seago webserver running on localhost:8080.
