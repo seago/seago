@@ -77,9 +77,11 @@ func main() {
 }
 ~~~
 Then install the Seago package (go 1.1 and greater is required):
-
+~~~
 go get github.com/seago/seago
+~~~
 Then run your server:
-
+~~~
 go run server.go
+~~~
 You will now have a Seago webserver running on localhost:8080.
