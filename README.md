@@ -1,7 +1,5 @@
 ## Seago
 
-[![Build Status](https://drone.io/github.com/seago/seago/status.png)](https://drone.io/github.com/seago/seago/latest)
-
 Seago is a simple web framework. The router package is inspired by web.go and martinit.
 
 ## Features
