@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-var NotFound = func(ctx *context.Context) {
+var notFound = func(ctx *context.Context) {
 	ctx.Response.SetStatus(http.StatusNotFound)
 	ctx.Response.Write([]byte("Page Not Found"))
 	return
@@ -27,11 +27,12 @@ type route struct {
 }
 
 type Router struct {
-	routes []*route
+	routes   []*route
+	notFound func(ctx *context.Context)
 }
 
 func NewRouter() *Router {
-	return &Router{make([]*route, 0, 0)}
+	return &Router{make([]*route, 0, 0), notFound}
 }
 
 func (router *Router) AddRouter(pattern, method string, handler interface{}) error {
@@ -45,7 +46,7 @@ func (router *Router) AddRouter(pattern, method string, handler interface{}) err
 
 func (router *Router) Process(rw http.ResponseWriter, r *http.Request, maxMemory int64) {
 	ctx := context.NewContext(rw, r)
-	ctx.Response.SetContentType(".html")
+	ctx.Response.SetHeader("Content-Type", "text/html; charset=utf-8")
 	query := r.URL.Query()
 	for k, _ := range query {
 		ctx.SetParam(k, query.Get(k))
@@ -128,7 +129,7 @@ func (router *Router) process(ctx *context.Context) (unused *route) {
 		return
 	}
 	//TODO:Page not found
-	NotFound(ctx)
+	router.notFound(ctx)
 	return
 }
 
@@ -153,6 +154,9 @@ func newRoute(pattern, method string, handler interface{}) (*route, error) {
 	case reflect.Value:
 		fv := handler.(reflect.Value)
 		route.handler = fv
+	case func(w http.ResponseWriter, r *http.Request):
+		fn := handler.(func(w http.ResponseWriter, r *http.Request))
+		route.httpHandler = http.HandlerFunc(fn)
 	default:
 		if !checkHandler(handler) {
 			return nil, errors.New("handler is not func")
