@@ -3,7 +3,6 @@ package memory
 import (
 	"errors"
 	"github.com/seago/seago/session"
-	"sync"
 	"time"
 )
 
@@ -19,7 +18,6 @@ func newStorage(value interface{}, expires int64) *storage {
 type MemorySession struct {
 	storge  map[string]*storage
 	expires int64
-	*sync.Mutex
 }
 
 var (
@@ -27,12 +25,10 @@ var (
 )
 
 func New(expires int64) *MemorySession {
-	return &MemorySession{make(map[string]*storage), expires + time.Now().Unix(), new(sync.Mutex)}
+	return &MemorySession{make(map[string]*storage), expires + time.Now().Unix()}
 }
 
 func (ms *MemorySession) Get(key string) interface{} {
-	ms.Lock()
-	defer ms.Unlock()
 	if ms.Expires() || ms.storageExpires(key) {
 		return nil
 	}
@@ -43,8 +39,6 @@ func (ms *MemorySession) Get(key string) interface{} {
 }
 
 func (ms *MemorySession) Set(key string, value interface{}, expires int64) error {
-	ms.Lock()
-	defer ms.Unlock()
 	if ms.Expires() {
 		return setError
 	}
@@ -63,8 +57,6 @@ func (ms *MemorySession) SetExpires(expired int64) {
 }
 
 func (ms *MemorySession) Clear(key string) {
-	ms.Lock()
-	defer ms.Unlock()
 	if _, ok := ms.storge[key]; ok {
 		delete(ms.storge, key)
 	}
@@ -98,7 +90,7 @@ func (ms *MemorySession) Expires() bool {
 
 func (ms *MemorySession) GC() {
 	if ms.Expires() {
-		ms = nil
+		ms.Flush()
 		return
 	}
 	for k, _ := range ms.storge {

@@ -57,7 +57,9 @@ func (sm *SessionManager) NewSession(w http.ResponseWriter) Storager {
 	cookie.HttpOnly = sm.HttpOnly
 	cookie.Secure = sm.Secure
 	storages[sm.storageName].SetExpires(sm.expires) //set storager expires
+
 	sm.storage[sid] = storages[sm.storageName]
+
 	http.SetCookie(w, cookie)
 	return sm.storage[sid]
 }
@@ -67,9 +69,11 @@ func (sm *SessionManager) GetStorager(w http.ResponseWriter, r *http.Request) St
 	if err != nil {
 		return sm.NewSession(w)
 	}
+
 	if _, ok := sm.storage[cookie.Value]; !ok {
 		return sm.NewSession(w)
 	}
+
 	return sm.storage[cookie.Value]
 }
 
@@ -77,9 +81,7 @@ func (sm *SessionManager) GC() {
 	for {
 		select {
 		case <-time.After(sm.GcDelay):
-			println("gc")
 			for k, v := range sm.storage {
-				println(v.Expires())
 				if v.Expires() {
 					delete(sm.storage, k)
 				} else {
