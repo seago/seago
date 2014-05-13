@@ -2,6 +2,7 @@ package memory
 
 import (
 	"errors"
+	"github.com/seago/seago/session"
 	"sync"
 	"time"
 )
@@ -32,7 +33,10 @@ func New(expires int64) *MemorySession {
 func (ms *MemorySession) Get(key string) interface{} {
 	ms.Lock()
 	defer ms.Unlock()
-	if ms.storageExpires(key) {
+	if ms.Expires() || ms.storageExpires(key) {
+		return nil
+	}
+	if _, ok := ms.storge[key]; !ok {
 		return nil
 	}
 	return ms.storge[key].value
@@ -54,12 +58,20 @@ func (ms *MemorySession) Set(key string, value interface{}, expires int64) error
 	return nil
 }
 
+func (ms *MemorySession) SetExpires(expired int64) {
+	ms.expires = expired + time.Now().Unix()
+}
+
 func (ms *MemorySession) Clear(key string) {
 	ms.Lock()
 	defer ms.Unlock()
 	if _, ok := ms.storge[key]; ok {
 		delete(ms.storge, key)
 	}
+}
+
+func (ms *MemorySession) Flush() {
+	ms = nil
 }
 
 func (ms *MemorySession) storageExpires(key string) bool {
@@ -94,4 +106,8 @@ func (ms *MemorySession) GC() {
 			delete(ms.storge, k)
 		}
 	}
+}
+
+func init() {
+	session.Register("memory", New(604800))
 }
