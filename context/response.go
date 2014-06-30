@@ -70,5 +70,6 @@ func (r *Response) JsonError(v interface{}) []byte {
 		return []byte("json encoding error:" + err.Error())
 	}
 	r.SetContentType("json")
+	r.SetStatus(http.StatusBadRequest)
 	return b
 }
