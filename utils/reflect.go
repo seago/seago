@@ -3,7 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"logger"
+	"github.com/seago/seago/logger"
 	"reflect"
 	"runtime/debug"
 	"unicode"

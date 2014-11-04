@@ -1,12 +1,11 @@
 package server
 
 import (
+	log "github.com/seago/seago/logger"
 	"github.com/seago/seago/router"
-	"log"
 	"net"
 	"net/http"
 	"net/http/pprof"
-	"os"
 )
 
 var VERSION = "0.0.1"
@@ -21,11 +20,13 @@ type Server struct {
 }
 
 func NewServer() *Server {
-	return &Server{
+	s := &Server{
 		router:    router.NewRouter(),
-		Logger:    log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile),
+		Logger:    log.StdLogger,
 		maxMemory: 100 << 20, //100M
 	}
+	s.SetMaxMemory(s.maxMemory)
+	return s
 }
 
 func (s *Server) SetProfile(is bool) {
@@ -39,11 +40,14 @@ func (s *Server) SetMaxMemory(maxMemory int64) {
 func (s *Server) AddRouter(pattern, method string, handler interface{}) {
 	err := s.router.AddRouter(pattern, method, handler)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 }
 
 func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	if s.profiler {
+		s.pprof()
+	}
 	rw.Header().Set("Server", "seago "+VERSION)
 	s.router.Process(rw, r, s.maxMemory)
 }
@@ -52,20 +56,14 @@ func (s *Server) pprof() {
 	s.AddRouter("/debug/pprof/cmdline", "GET", http.HandlerFunc(pprof.Cmdline))
 	s.AddRouter("/debug/pprof/profile", "GET", http.HandlerFunc(pprof.Profile))
 	s.AddRouter("/debug/pprof/heap", "GET", pprof.Handler("heap"))
-	s.AddRouter("/debug/pprof/symbol", "GET", http.HandlerFunc(pprof.Symbol))
+	s.AddRouter("/debug/pprof/symbol", "*", http.HandlerFunc(pprof.Symbol))
 }
 
 func (s *Server) Run(addr string) {
-
-	// mux := http.NewServeMux()
-	if s.profiler {
-		s.pprof()
-	}
-	// mux.Handle("/", s)
-	s.Logger.Printf("server serving %s\n", addr)
+	s.Logger.Info("server serving %s\n", addr)
 	l, err := net.Listen("tcp", addr)
 	if err != nil {
-		s.Logger.Fatal("ListenAndServe Fatal:", err)
+		s.Logger.Fatal("Listen Fatal:", err)
 	}
 	s.l = l
 	err = http.Serve(s.l, s)

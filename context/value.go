@@ -2,6 +2,7 @@ package context
 
 import (
 	"encoding/json"
+	"html"
 	"strconv"
 )
 
@@ -40,6 +41,18 @@ func (v Value) Float32() float32 {
 func (v Value) Float64() float64 {
 	f, _ := strconv.ParseFloat(string(v), 64)
 	return f
+}
+
+/**
+ * 获取bool值
+ */
+func (v Value) Bool() bool {
+	b, _ := strconv.ParseBool(string(v))
+	return b
+}
+
+func (v Value) HtmlEscape() string {
+	return html.EscapeString(string(v))
 }
 
 /**
