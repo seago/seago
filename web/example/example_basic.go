@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/seago/seago/web"
+	"net/http"
 )
 
 func main() {
@@ -12,8 +13,9 @@ func main() {
 		Prefix:    "/public",
 		IndexFile: "index.html",
 	}))
-	m.Before(func(c *web.Context) {
-		c.Header().Add("Server", "JDServer")
+	m.Before(func(w http.ResponseWriter, r *http.Request) bool {
+		w.Header().Add("Server", "JDServer")
+		return false
 	})
 	m.Get("/", func() string {
 		return "index"
