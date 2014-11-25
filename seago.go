@@ -235,7 +235,7 @@ func setENV(e string) {
 }
 
 func init() {
-	setENV(os.Getenv("MACARON_ENV"))
+	setENV(os.Getenv("SEAGO_ENV"))
 	var err error
 	Root, err = os.Getwd()
 	if err != nil {
