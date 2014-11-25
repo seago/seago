@@ -1,13 +1,12 @@
 ## Seago
 [![Build Status](https://drone.io/github.com/seago/seago/status.png?time=123456790)](https://drone.io/github.com/seago/seago/latest)
 
-Seago is a simple web framework. The router package is inspired by web.go and martini.
+Seago 的Web包是一个golang 的 http 框架，代码来自Macaron。
 
-## Features
-* RESTful support
-* Session support
-* Cache support
-* Middleware support
+## 功能
+* 支持Restful
+* 支持模板
+* 
 
 ##Getting Started
 
