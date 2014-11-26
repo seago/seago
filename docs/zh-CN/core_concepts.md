@@ -1,5 +1,5 @@
 # Seago 核心概念
-经典 Seago
+##经典 Seago
 
 为了更快速的启用 Seago，seago.Classic 提供了一些默认的组件以方便 Web 开发:
 
@@ -15,7 +15,7 @@ Seago 实例
 
 任何类型为 seago.Seago 的对象都可以被认为是 Macaron 的实例，您可以在单个应用中使用任意数量的 Seago 实例。
 
-处理器
+##处理器
 
 处理器是 Seago 的灵魂和核心所在. 一个处理器基本上可以是任何的函数:
 
@@ -34,7 +34,7 @@ Seago 实例
 	s.Get("/", func() (int, string) {
     	return 418, "i'm a teapot" // HTTP 418 : "i'm a teapot"
 	})
-服务注入
+## 服务注入
 
 处理器是通过反射来调用的，Seago 通过 依赖注入 来为处理器注入参数列表。 这样使得 Seago 与 Go 语言的 http.HandlerFunc 接口完全兼容。
 
@@ -50,7 +50,7 @@ Seago 实例
 *log.Logger - Seago 全局日志器
 http.ResponseWriter - HTTP 响应流
 *http.Request - HTTP 请求对象
-中间件机制
+## 中间件机制
 
 中间件处理器是工作于请求和路由之间的。本质上来说和 Macaron 其他的处理器没有分别. 您可以使用如下方法来添加一个中间件处理器到队列中:
 
@@ -72,7 +72,10 @@ http.ResponseWriter - HTTP 响应流
 	        ctx.Response.WriteHeader(http.StatusUnauthorized)
 	    }
 	})
-Seago 环境变量
+## Seago 环境变量
 
 一些 Seago 处理器依赖 seago.Env 全局变量为开发模式和部署模式表现出不同的行为，不过更建议使用环境变量 SEAGO_ENV=production 来指示当前的模式为部署模式。
+
+##处理器工作流
+![处理器工作流](/docs/images/core.png)
 
