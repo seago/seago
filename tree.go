@@ -22,7 +22,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/seago/utils"
+	"github.com/seago/com"
 )
 
 type leafInfo struct {
@@ -37,7 +37,7 @@ type leafInfo struct {
 func (leaf *leafInfo) match(wildcardValues []string) (ok bool, params Params) {
 	if leaf.regexps == nil {
 		if len(wildcardValues) == 0 && len(leaf.wildcards) > 0 {
-			if utils.IsSliceContainsStr(leaf.wildcards, ":") {
+			if com.IsSliceContainsStr(leaf.wildcards, ":") {
 				params = make(map[string]string)
 				j := 0
 				for _, v := range leaf.wildcards {
@@ -302,7 +302,7 @@ func (t *Tree) addSegments(segments []string, handle Handle, wildcards []string,
 	seg := segments[0]
 	iswild, params, regexpStr := splitSegment(seg)
 	//for the router  /login/*/access match /login/2009/11/access
-	if !iswild && utils.IsSliceContainsStr(wildcards, ":splat") {
+	if !iswild && com.IsSliceContainsStr(wildcards, ":splat") {
 		iswild = true
 		regexpStr = seg
 	}

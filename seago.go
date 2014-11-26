@@ -23,7 +23,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/seago/utils"
+	"github.com/seago/com"
 
 	"github.com/seago/seago/inject"
 )
@@ -166,7 +166,7 @@ func GetDefaultListenInfo() (string, int) {
 	if len(host) == 0 {
 		host = "0.0.0.0"
 	}
-	port := utils.StrTo(os.Getenv("PORT")).MustInt()
+	port := com.StrTo(os.Getenv("PORT")).MustInt()
 	if port == 0 {
 		port = 4000
 	}
@@ -192,7 +192,7 @@ func (m *Seago) Run(args ...interface{}) {
 		}
 	}
 
-	addr := host + ":" + utils.ToStr(port)
+	addr := host + ":" + com.ToStr(port)
 	logger := m.Injector.GetVal(reflect.TypeOf(m.logger)).Interface().(*log.Logger)
 	logger.Printf("listening on %s (%s)\n", addr, Env)
 	logger.Fatalln(http.ListenAndServe(addr, m))
