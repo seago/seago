@@ -31,7 +31,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/seago/utils"
+	"github.com/seago/com"
 
 	"github.com/seago/seago/inject"
 )
@@ -205,12 +205,12 @@ func (ctx *Context) QueryEscape(name string) string {
 
 // QueryInt returns query result in int type.
 func (ctx *Context) QueryInt(name string) int {
-	return utils.StrTo(ctx.Query(name)).MustInt()
+	return com.StrTo(ctx.Query(name)).MustInt()
 }
 
 // QueryInt64 returns query result in int64 type.
 func (ctx *Context) QueryInt64(name string) int64 {
-	return utils.StrTo(ctx.Query(name)).MustInt64()
+	return com.StrTo(ctx.Query(name)).MustInt64()
 }
 
 func (ctx *Context) GetParam(name string) Value {

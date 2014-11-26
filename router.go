@@ -19,7 +19,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/seago/utils"
+	"github.com/seago/com"
 )
 
 var (
@@ -260,7 +260,7 @@ func (r *Router) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 				p["*"] = p[":splat"] // Better name.
 				splatlist := strings.Split(splat, "/")
 				for k, v := range splatlist {
-					p[utils.ToStr(k)] = v
+					p[com.ToStr(k)] = v
 				}
 			}
 			h(rw, req, p)

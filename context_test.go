@@ -23,7 +23,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/seago/utils"
+	"github.com/seago/com"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -54,7 +54,7 @@ func Test_Context(t *testing.T) {
 
 			for i := 1; i <= 3; i++ {
 				resp := httptest.NewRecorder()
-				req, err := http.NewRequest("GET", "/body"+utils.ToStr(i), nil)
+				req, err := http.NewRequest("GET", "/body"+com.ToStr(i), nil)
 				req.Body = ioutil.NopCloser(bytes.NewBufferString("This is my request body"))
 				So(err, ShouldBeNil)
 				m.ServeHTTP(resp, req)
@@ -102,8 +102,8 @@ func Test_Context(t *testing.T) {
 				var buf bytes.Buffer
 				buf.WriteString(ctx.Query("name") + " ")
 				buf.WriteString(ctx.QueryEscape("name") + " ")
-				buf.WriteString(utils.ToStr(ctx.QueryInt("int")) + " ")
-				buf.WriteString(utils.ToStr(ctx.QueryInt64("int64")) + " ")
+				buf.WriteString(com.ToStr(ctx.QueryInt("int")) + " ")
+				buf.WriteString(com.ToStr(ctx.QueryInt64("int64")) + " ")
 				return buf.String()
 			})
 			m.Get("/query2", func(ctx *Context) string {
@@ -131,8 +131,8 @@ func Test_Context(t *testing.T) {
 				var buf bytes.Buffer
 				buf.WriteString(ctx.GetParam("name").String() + " ")
 				buf.WriteString(ctx.GetParam("name").HtmlEscape() + " ")
-				buf.WriteString(utils.ToStr(ctx.GetParam("int").Int()) + " ")
-				buf.WriteString(utils.ToStr(ctx.GetParam("int64").Int64()) + " ")
+				buf.WriteString(com.ToStr(ctx.GetParam("int").Int()) + " ")
+				buf.WriteString(com.ToStr(ctx.GetParam("int64").Int64()) + " ")
 				return buf.String()
 			})
 
