@@ -18,6 +18,7 @@ Seago是一个golang 的 http 框架，代码 fork 自Macaron。
 ## 帮助文档
 * [开始](/docs/zh-CN/start.md)
 * [核心概念](/docs/zh-CN/core_concepts.md)
+* [路由模块](/docs/zh-CN/router.md)
 
 
 ## 特别鸣谢
