@@ -165,7 +165,7 @@ func (ctx *Context) HTMLSet(status int, setName, tplName string, data ...interfa
 	ctx.renderHTML(status, setName, tplName, data...)
 }
 
-f//URL跳转
+//URL跳转
 func (ctx *Context) Redirect(location string, status ...int) {
 	code := http.StatusFound
 	if len(status) == 1 {
