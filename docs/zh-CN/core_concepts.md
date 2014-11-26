@@ -13,7 +13,7 @@
 静态文件服务 - seago.Static
 Seago 实例
 
-任何类型为 seago.Seago 的对象都可以被认为是 Macaron 的实例，您可以在单个应用中使用任意数量的 Seago 实例。
+任何类型为 seago.Seago 的对象都可以被认为是 Seago 的实例，您可以在单个应用中使用任意数量的 Seago 实例。
 
 ##处理器
 
@@ -41,10 +41,10 @@ Seago 实例
 如果你加入一个参数到你的处理器, Seago 将会搜索它参数列表中的服务，并且通过类型判断来解决依赖关系：
 
 	m.Get("/", func(resp http.ResponseWriter, req *http.Request) { 
-	    // resp 和 req 是由 Macaron 默认注入的服务
+	    // resp 和 req 是由 Seago 默认注入的服务
 	    resp.WriteHeader(200) // HTTP 200
 	})
-下面的这些服务已经被包含在经典 Macaron 中（seago.Classic）：
+下面的这些服务已经被包含在经典 Seago 中（seago.Classic）：
 
 *seago.Context - HTTP 请求上下文
 *log.Logger - Seago 全局日志器
@@ -52,7 +52,7 @@ http.ResponseWriter - HTTP 响应流
 *http.Request - HTTP 请求对象
 ## 中间件机制
 
-中间件处理器是工作于请求和路由之间的。本质上来说和 Macaron 其他的处理器没有分别. 您可以使用如下方法来添加一个中间件处理器到队列中:
+中间件处理器是工作于请求和路由之间的。本质上来说和 Seago 其他的处理器没有分别. 您可以使用如下方法来添加一个中间件处理器到队列中:
 
 	s.Use(func() {
 	  // 处理中间件事物
@@ -76,6 +76,6 @@ http.ResponseWriter - HTTP 响应流
 
 一些 Seago 处理器依赖 seago.Env 全局变量为开发模式和部署模式表现出不同的行为，不过更建议使用环境变量 SEAGO_ENV=production 来指示当前的模式为部署模式。
 
-##处理器工作流
+## 处理器工作流
 ![处理器工作流](/docs/images/core.png)
 
