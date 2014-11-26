@@ -19,7 +19,6 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
-	"html/template"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -30,8 +29,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/seago/com"
 
 	"github.com/seago/seago/inject"
 )
@@ -168,7 +165,7 @@ func (ctx *Context) HTMLSet(status int, setName, tplName string, data ...interfa
 	ctx.renderHTML(status, setName, tplName, data...)
 }
 
-//URL跳转
+f//URL跳转
 func (ctx *Context) Redirect(location string, status ...int) {
 	code := http.StatusFound
 	if len(status) == 1 {
