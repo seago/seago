@@ -94,7 +94,7 @@
 
 	/user/:id:int：:int 是 ([0-9]+) 正则的简写。
 	/user/:name:string：:string 是 ([\w]+) 正则的简写。
-	
+
 ## 高级路由定义
 
 路由处理器可以被相互叠加使用, 例如很有用的地方可以是在验证和授权的时候:
@@ -113,7 +113,7 @@
 	)
 
 	func main() {
-	    m := Seago.Classic()
+	    s :=  Seago.Classic()
 	    s.Get("/",
 	        func(ctx *Seago.Context) {
 	            ctx.Data["Count"] = 1
@@ -149,7 +149,7 @@
 	)
 
 	func main() {
-	    m := Seago.Classic()
+	    s :=  Seago.Classic()
 	    s.Get("/",
 	        func(ctx *Seago.Context) {
 	            ctx.Data["Count"] = 1
