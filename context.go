@@ -252,7 +252,7 @@ func (ctx *Context) GetCookie(name string) string {
 var defaultCookieSecret string
 
 // SetDefaultCookieSecret sets global default secure cookie secret.
-func (m *Seago) SetDefaultCookieSecret(secret string) {
+func (s *Seago) SetDefaultCookieSecret(secret string) {
 	defaultCookieSecret = secret
 }
 
