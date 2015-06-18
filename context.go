@@ -19,7 +19,6 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
-	"html/template"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -30,8 +29,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/seago/com"
 
 	"github.com/seago/seago/inject"
 )
@@ -168,6 +165,7 @@ func (ctx *Context) HTMLSet(status int, setName, tplName string, data ...interfa
 	ctx.renderHTML(status, setName, tplName, data...)
 }
 
+//URL跳转
 func (ctx *Context) Redirect(location string, status ...int) {
 	code := http.StatusFound
 	if len(status) == 1 {
@@ -177,42 +175,7 @@ func (ctx *Context) Redirect(location string, status ...int) {
 	http.Redirect(ctx.Response, ctx.Request.Request, location, code)
 }
 
-// Query querys form parameter.
-func (ctx *Context) Query(name string) string {
-	if ctx.Request.Form == nil {
-		ctx.Request.ParseForm()
-	}
-	return ctx.Request.Form.Get(name)
-}
-
-// QueryStrings returns a list of results by given query name.
-func (ctx *Context) QueryStrings(name string) []string {
-	if ctx.Request.Form == nil {
-		ctx.Request.ParseForm()
-	}
-
-	vals, ok := ctx.Request.Form[name]
-	if !ok {
-		return []string{}
-	}
-	return vals
-}
-
-// QueryEscape returns escapred query result.
-func (ctx *Context) QueryEscape(name string) string {
-	return template.HTMLEscapeString(ctx.Query(name))
-}
-
-// QueryInt returns query result in int type.
-func (ctx *Context) QueryInt(name string) int {
-	return com.StrTo(ctx.Query(name)).MustInt()
-}
-
-// QueryInt64 returns query result in int64 type.
-func (ctx *Context) QueryInt64(name string) int64 {
-	return com.StrTo(ctx.Query(name)).MustInt64()
-}
-
+//获取http 请求中 GET POST PUT DELETE等方法的参数以及路由规则中的参数
 func (ctx *Context) GetParam(name string) Value {
 	return Value(ctx.params[name])
 }
@@ -289,7 +252,7 @@ func (ctx *Context) GetCookie(name string) string {
 var defaultCookieSecret string
 
 // SetDefaultCookieSecret sets global default secure cookie secret.
-func (m *Seago) SetDefaultCookieSecret(secret string) {
+func (s *Seago) SetDefaultCookieSecret(secret string) {
 	defaultCookieSecret = secret
 }
 

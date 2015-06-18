@@ -1,5 +1,6 @@
 // Copyright 2013 Martini Authors
-// Copyright 2014 Unknwon
+// Copyright 2013 oxtoacart
+// Copyright 2014 SEAGO
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -31,8 +32,39 @@ import (
 	"sync"
 	"time"
 
-	"github.com/seago/seago/bpool"
+	"github.com/seago/com"
 )
+
+// BufferPool implements a pool of bytes.Buffers in the form of a bounded channel.
+type BufferPool struct {
+	c chan *bytes.Buffer
+}
+
+// NewBufferPool creates a new BufferPool bounded to the given size.
+func NewBufferPool(size int) (bp *BufferPool) {
+	return &BufferPool{
+		c: make(chan *bytes.Buffer, size),
+	}
+}
+
+// Get gets a Buffer from the BufferPool, or creates a new one if none are available
+// in the pool.
+func (bp *BufferPool) Get() (b *bytes.Buffer) {
+	select {
+	case b = <-bp.c:
+	// reuse existing buffer
+	default:
+		// create new buffer
+		b = bytes.NewBuffer([]byte{})
+	}
+	return
+}
+
+// Put returns the given Buffer to the BufferPool.
+func (bp *BufferPool) Put(b *bytes.Buffer) {
+	b.Reset()
+	bp.c <- b
+}
 
 const (
 	ContentType    = "Content-Type"
@@ -40,6 +72,7 @@ const (
 	ContentBinary  = "application/octet-stream"
 	ContentJSON    = "application/json"
 	ContentHTML    = "text/html"
+	CONTENT_PLAIN  = "text/plain"
 	ContentXHTML   = "application/xhtml+xml"
 	ContentXML     = "text/xml"
 	defaultCharset = "UTF-8"
@@ -47,7 +80,7 @@ const (
 
 var (
 	// Provides a temporary buffer to execute templates into and catch errors.
-	bufpool = bpool.NewBufferPool(64)
+	bufpool = NewBufferPool(64)
 
 	// Included helper functions for use when rendering html
 	helperFuncs = template.FuncMap{
@@ -60,106 +93,18 @@ var (
 	}
 )
 
-func PrepareCharset(charset string) string {
-	if len(charset) != 0 {
-		return "; charset=" + charset
-	}
-
-	return "; charset=" + defaultCharset
-}
-
-func GetExt(s string) string {
-	if strings.Index(s, ".") == -1 {
-		return ""
-	}
-	return "." + strings.Join(strings.Split(s, ".")[1:], ".")
-}
-
-func compile(options *RenderOptions) *template.Template {
-	dir := options.Directory
-	t := template.New(dir)
-	t.Delims(options.Delims.Left, options.Delims.Right)
-	// Parse an initial template in case we don't have any.
-	template.Must(t.Parse("Macaron"))
-
-	if err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		r, err := filepath.Rel(dir, path)
-		if err != nil {
-			return err
-		}
-
-		ext := GetExt(r)
-
-		for _, extension := range options.Extensions {
-			if ext == extension {
-
-				buf, err := ioutil.ReadFile(path)
-				if err != nil {
-					panic(err)
-				}
-
-				name := (r[0 : len(r)-len(ext)])
-				tmpl := t.New(filepath.ToSlash(name))
-
-				// add our funcmaps
-				for _, funcs := range options.Funcs {
-					tmpl.Funcs(funcs)
-				}
-
-				// Bomb out if parse fails. We don't want any silent server starts.
-				template.Must(tmpl.Funcs(helperFuncs).Parse(string(buf)))
-				break
-			}
-		}
-
-		return nil
-	}); err != nil {
-		panic("fail to walk templates directory: " + err.Error())
-	}
-
-	return t
-}
-
-// templateSet represents a template set of type *template.Template.
-type templateSet struct {
-	lock sync.RWMutex
-	sets map[string]*template.Template
-	dirs map[string]string
-}
-
-func newTemplateSet() *templateSet {
-	return &templateSet{
-		sets: make(map[string]*template.Template),
-		dirs: make(map[string]string),
-	}
-}
-
-func (ts *templateSet) Set(name string, opt *RenderOptions) *template.Template {
-	t := compile(opt)
-
-	ts.lock.Lock()
-	defer ts.lock.Unlock()
-
-	ts.sets[name] = t
-	ts.dirs[name] = opt.Directory
-	return t
-}
-
-func (ts *templateSet) Get(name string) *template.Template {
-	ts.lock.RLock()
-	defer ts.lock.RUnlock()
-
-	return ts.sets[name]
-}
-
-func (ts *templateSet) GetDir(name string) string {
-	ts.lock.RLock()
-	defer ts.lock.RUnlock()
-
-	return ts.dirs[name]
-}
-
 type (
+	// TemplateFile represents a interface of template file that has name and can be read.
+	TemplateFile interface {
+		Name() string
+		Data() []byte
+		Ext() string
+	}
+	// TemplateFileSystem represents a interface of template file system that able to list all files.
+	TemplateFileSystem interface {
+		ListFiles() []TemplateFile
+	}
+
 	// Delims represents a set of Left and Right delimiters for HTML template rendering
 	Delims struct {
 		// Left delimiter, defaults to {{
@@ -192,6 +137,8 @@ type (
 		PrefixXML []byte
 		// Allows changing of output to XHTML instead of HTML. Default is "text/html"
 		HTMLContentType string
+		// TemplateFileSystem is the interface for supporting any implmentation of template file system.
+		TemplateFileSystem
 	}
 
 	// HTMLOptions is a struct for overriding some rendering Options for specific HTML call
@@ -199,32 +146,180 @@ type (
 		// Layout template name. Overrides Options.Layout.
 		Layout string
 	}
+
+	Render interface {
+		http.ResponseWriter
+		RW() http.ResponseWriter
+
+		JSON(int, interface{})
+		JSONString(interface{}) (string, error)
+		RawData(int, []byte)
+		RenderData(int, []byte)
+		HTML(int, string, interface{}, ...HTMLOptions)
+		HTMLSet(int, string, string, interface{}, ...HTMLOptions)
+		HTMLSetString(string, string, interface{}, ...HTMLOptions) (string, error)
+		HTMLString(string, interface{}, ...HTMLOptions) (string, error)
+		HTMLSetBytes(string, string, interface{}, ...HTMLOptions) ([]byte, error)
+		HTMLBytes(string, interface{}, ...HTMLOptions) ([]byte, error)
+		XML(int, interface{})
+		Error(int, ...string)
+		Status(int)
+		SetTemplatePath(string, string)
+		HasTemplateSet(string) bool
+	}
 )
 
-type Render interface {
-	http.ResponseWriter
-	RW() http.ResponseWriter
+// TplFile implements TemplateFile interface.
+type TplFile struct {
+	name string
+	data []byte
+	ext  string
+}
 
-	JSON(int, interface{})
-	JSONString(interface{}) (string, error)
-	RawData(int, []byte)
-	RenderData(int, []byte)
-	HTML(int, string, interface{}, ...HTMLOptions)
-	HTMLSet(int, string, string, interface{}, ...HTMLOptions)
-	HTMLSetString(string, string, interface{}, ...HTMLOptions) (string, error)
-	HTMLString(string, interface{}, ...HTMLOptions) (string, error)
-	HTMLSetBytes(string, string, interface{}, ...HTMLOptions) ([]byte, error)
-	HTMLBytes(string, interface{}, ...HTMLOptions) ([]byte, error)
-	XML(int, interface{})
-	Error(int, ...string)
-	Status(int)
-	SetTemplatePath(string, string)
-	HasTemplateSet(string) bool
+// NewTplFile cerates new template file with given name and data.
+func NewTplFile(name string, data []byte, ext string) *TplFile {
+	return &TplFile{name, data, ext}
+}
+
+func (f *TplFile) Name() string {
+	return f.name
+}
+
+func (f *TplFile) Data() []byte {
+	return f.data
+}
+
+func (f *TplFile) Ext() string {
+	return f.ext
+}
+
+// TplFileSystem implements TemplateFileSystem interface.
+type TplFileSystem struct {
+	files []TemplateFile
+}
+
+// NewTemplateFileSystem creates new template file system with given options.
+func NewTemplateFileSystem(opt RenderOptions, omitData bool) TplFileSystem {
+	fs := TplFileSystem{}
+	fs.files = make([]TemplateFile, 0, 10)
+
+	if err := filepath.Walk(opt.Directory, func(path string, info os.FileInfo, err error) error {
+		r, err := filepath.Rel(opt.Directory, path)
+		if err != nil {
+			return err
+		}
+
+		ext := GetExt(r)
+
+		for _, extension := range opt.Extensions {
+			if ext == extension {
+				var data []byte
+				if !omitData {
+					data, err = ioutil.ReadFile(path)
+					if err != nil {
+						return err
+					}
+				}
+
+				name := filepath.ToSlash((r[0 : len(r)-len(ext)]))
+				fs.files = append(fs.files, NewTplFile(name, data, ext))
+				break
+			}
+		}
+
+		return nil
+	}); err != nil {
+		panic("NewTemplateFileSystem: " + err.Error())
+	}
+
+	return fs
+}
+
+func (fs TplFileSystem) ListFiles() []TemplateFile {
+	return fs.files
+}
+
+func PrepareCharset(charset string) string {
+	if len(charset) != 0 {
+		return "; charset=" + charset
+	}
+
+	return "; charset=" + defaultCharset
+}
+
+func GetExt(s string) string {
+	index := strings.Index(s, ".")
+	if index == -1 {
+		return ""
+	}
+	return s[index:]
+}
+
+func compile(opt RenderOptions) *template.Template {
+	dir := opt.Directory
+	t := template.New(dir)
+	t.Delims(opt.Delims.Left, opt.Delims.Right)
+	// Parse an initial template in case we don't have any.
+	template.Must(t.Parse("SEAGO"))
+
+	if opt.TemplateFileSystem == nil {
+		opt.TemplateFileSystem = NewTemplateFileSystem(opt, false)
+	}
+
+	for _, f := range opt.TemplateFileSystem.ListFiles() {
+		tmpl := t.New(f.Name())
+		for _, funcs := range opt.Funcs {
+			tmpl.Funcs(funcs)
+		}
+		// Bomb out if parse fails. We don't want any silent server starts.
+		template.Must(tmpl.Funcs(helperFuncs).Parse(string(f.Data())))
+	}
+
+	return t
 }
 
 const (
 	_DEFAULT_TPL_SET_NAME = "DEFAULT"
 )
+
+// templateSet represents a template set of type *template.Template.
+type templateSet struct {
+	lock sync.RWMutex
+	sets map[string]*template.Template
+	dirs map[string]string
+}
+
+func newTemplateSet() *templateSet {
+	return &templateSet{
+		sets: make(map[string]*template.Template),
+		dirs: make(map[string]string),
+	}
+}
+
+func (ts *templateSet) Set(name string, opt *RenderOptions) *template.Template {
+	t := compile(*opt)
+
+	ts.lock.Lock()
+	defer ts.lock.Unlock()
+
+	ts.sets[name] = t
+	ts.dirs[name] = opt.Directory
+	return t
+}
+
+func (ts *templateSet) Get(name string) *template.Template {
+	ts.lock.RLock()
+	defer ts.lock.RUnlock()
+
+	return ts.sets[name]
+}
+
+func (ts *templateSet) GetDir(name string) string {
+	ts.lock.RLock()
+	defer ts.lock.RUnlock()
+
+	return ts.dirs[name]
+}
 
 func prepareOptions(options []RenderOptions) RenderOptions {
 	var opt RenderOptions
@@ -246,25 +341,34 @@ func prepareOptions(options []RenderOptions) RenderOptions {
 	return opt
 }
 
+func ParseTplSet(tplSet string) (tplName string, tplDir string) {
+	tplSet = strings.TrimSpace(tplSet)
+	if len(tplSet) == 0 {
+		panic("empty template set argument")
+	}
+	infos := strings.Split(tplSet, ":")
+	if len(infos) == 1 {
+		tplDir = infos[0]
+		tplName = path.Base(tplDir)
+	} else {
+		tplName = infos[0]
+		tplDir = infos[1]
+	}
+
+	if !com.IsDir(tplDir) {
+		panic("template set path does not exist or is not a directory")
+	}
+	return tplName, tplDir
+}
+
 func renderHandler(opt RenderOptions, tplSets []string) Handler {
 	cs := PrepareCharset(opt.Charset)
 	ts := newTemplateSet()
 	ts.Set(_DEFAULT_TPL_SET_NAME, &opt)
 
-	var (
-		tmpOpt  RenderOptions
-		tplName string
-		tplDir  string
-	)
+	var tmpOpt RenderOptions
 	for _, tplSet := range tplSets {
-		infos := strings.Split(tplSet, ":")
-		if len(infos) == 1 {
-			tplDir = infos[0]
-			tplName = path.Base(tplDir)
-		} else {
-			tplName = infos[0]
-			tplDir = infos[1]
-		}
+		tplName, tplDir := ParseTplSet(tplSet)
 		tmpOpt = opt
 		tmpOpt.Directory = tplDir
 		ts.Set(tplName, &tmpOpt)
@@ -289,13 +393,13 @@ func renderHandler(opt RenderOptions, tplSets []string) Handler {
 	}
 }
 
-// Renderer is a Middleware that maps a macaron.Render service into the Macaron handler chain.
-// An single variadic macaron.RenderOptions struct can be optionally provided to configure
+// Renderer is a Middleware that maps a seago.Render service into the Seago handler chain.
+// An single variadic seago.RenderOptions struct can be optionally provided to configure
 // HTML rendering. The default directory for templates is "templates" and the default
 // file extension is ".tmpl" and ".html".
 //
-// If MACARON_ENV is set to "" or "development" then templates will be recompiled on every request. For more performance, set the
-// MACARON_ENV environment variable to "production".
+// If SEAGO_ENV is set to "" or "development" then templates will be recompiled on every request. For more performance, set the
+// SEAGO_ENV environment variable to "production".
 func Renderer(options ...RenderOptions) Handler {
 	return renderHandler(prepareOptions(options), []string{})
 }
@@ -318,8 +422,10 @@ func (r *TplRender) RW() http.ResponseWriter {
 }
 
 func (r *TplRender) JSON(status int, v interface{}) {
-	var result []byte
-	var err error
+	var (
+		result []byte
+		err    error
+	)
 	if r.Opt.IndentJSON {
 		result, err = json.MarshalIndent(v, "", "  ")
 	} else {
@@ -388,7 +494,7 @@ func (r *TplRender) RawData(status int, v []byte) {
 }
 
 func (r *TplRender) RenderData(status int, v []byte) {
-	r.data(status, ContentHTML, v)
+	r.data(status, CONTENT_PLAIN, v)
 }
 
 func (r *TplRender) execute(t *template.Template, name string, data interface{}) (*bytes.Buffer, error) {
