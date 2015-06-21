@@ -54,12 +54,12 @@
 
 路由模型可能包含参数列表, 可以通过 *Context.GetParam 来获取:
 
-	s.Get("/hello/:name", func(ctx *Seago.Context) string {
+	s.Get("/hello/:name", func(ctx *seago.Context) string {
 	    return "Hello " + ctx.GetParam(":name").String()
 	})
 路由匹配可以通过全局匹配的形式:
 
-	s.Get("/hello/*", func(ctx *Seago.Context) string {
+	s.Get("/hello/*", func(ctx *seago.Context) string {
     	return "Hello " + ctx.GetParam("*").String()
 	})
 
@@ -69,22 +69,22 @@
 
 * 常规匹配：
 
-		s.Get("/user/:username([\\w]+)", func(ctx *Seago.Context) string {
+		s.Get("/user/:username([\\w]+)", func(ctx *seago.Context) string {
 		    return fmt.Sprintf("Hello %s", ctx.GetParam(":username"))
 		})
 
 
-		s.Get("/user/:id([0-9]+)", func(ctx *Seago.Context) string {
+		s.Get("/user/:id([0-9]+)", func(ctx *seago.Context) string {
 		    return fmt.Sprintf("User ID: %s", ctx.GetParam(":id"))
 		})
 
 
-		s.Get("/user/*.*", func(ctx *Seago.Context) string {
+		s.Get("/user/*.*", func(ctx *seago.Context) string {
 		    return fmt.Sprintf("Last part is: %s", ctx.GetParam(":path"), ctx.GetParam(":ext"))
 		})
 * 混合匹配：
 
-		s.Get("/cms_:id([0-9]+).html", func(ctx *Seago.Context) string {
+		s.Get("/cms_:id([0-9]+).html", func(ctx *seago.Context) string {
 		    return fmt.Sprintf("The ID is %s", ctx.GetParam(":id"))
 		})
 * 可选匹配：
@@ -115,22 +115,22 @@
 	func main() {
 	    s :=  Seago.Classic()
 	    s.Get("/",
-	        func(ctx *Seago.Context) {
+	        func(ctx *seago.Context) {
 	            ctx.Data["Count"] = 1
 	        },
-	        func(ctx *Seago.Context) {
+	        func(ctx *seago.Context) {
 	            ctx.Data["Count"] = ctx.Data["Count"].(int) + 1
 	        },
-	        func(ctx *Seago.Context) {
+	        func(ctx *seago.Context) {
 	            ctx.Data["Count"] = ctx.Data["Count"].(int) + 1
 	        },
-	        func(ctx *Seago.Context) {
+	        func(ctx *seago.Context) {
 	            ctx.Data["Count"] = ctx.Data["Count"].(int) + 1
 	        },
-	        func(ctx *Seago.Context) {
+	        func(ctx *seago.Context) {
 	            ctx.Data["Count"] = ctx.Data["Count"].(int) + 1
 	        },
-	        func(ctx *Seago.Context) string {
+	        func(ctx *seago.Context) string {
 	            return fmt.Sprintf("There are %d handlers before this", ctx.Data["Count"])
 	        },
 	    )
@@ -151,22 +151,22 @@
 	func main() {
 	    s :=  Seago.Classic()
 	    s.Get("/",
-	        func(ctx *Seago.Context) {
+	        func(ctx *seago.Context) {
 	            ctx.Data["Count"] = 1
 	        },
-	        func(ctx *Seago.Context) {
+	        func(ctx *seago.Context) {
 	            ctx.Data["Count"] = ctx.Data["Count"].(int) + 1
 	        },
-	        func(ctx *Seago.Context) {
+	        func(ctx *seago.Context) {
 	            ctx.Data["Count"] = ctx.Data["Count"].(int) + 1
 	        },
-	        func(ctx *Seago.Context) {
+	        func(ctx *seago.Context) {
 	            ctx.Data["Count"] = ctx.Data["Count"].(int) + 1
 	        },
-	        func(ctx *Seago.Context) string {
+	        func(ctx *seago.Context) string {
 	            return fmt.Sprintf("There are %d handlers before this", ctx.Data["Count"])
 	        },
-	        func(ctx *Seago.Context) string {
+	        func(ctx *seago.Context) string {
 	            return fmt.Sprintf("There are %d handlers before this", ctx.Data["Count"])
 	        },
 	    )
