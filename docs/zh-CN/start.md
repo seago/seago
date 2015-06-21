@@ -55,7 +55,7 @@
     	log.Println(http.ListenAndServe("0.0.0.0:4000", s))
 	}
 
-	func myHandler(ctx *web.Context) string {
+	func myHandler(ctx *seago.Context) string {
     	return "the request path is: " + ctx.Req.RequestURI
 	}
 当您再次执行命令 go run main.go 运行程序的时候，您会看到屏幕上显示的内容为 the request path is: /。
