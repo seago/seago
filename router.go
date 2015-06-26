@@ -166,12 +166,24 @@ func (r *Router) Handle(method string, pattern string, handlers []Handler) {
 			c.params[k] = query.Get(k)
 		}
 		//处理post请求的参数赋值给context's params
-		if req.Form == nil {
-			req.ParseForm()
-			if len(req.PostForm) > 0 {
-				query = req.PostForm
-				for k, _ := range query {
-					c.params[k] = query.Get(k)
+		if method == "POST" || method == "PUT" || method == "PATCH" {
+			if req.Form == nil {
+				if strings.Contains(req.Header.Get("Content-Type"), "multipart/form-data") {
+					req.ParseMultipartForm(32 << 20)
+				} else {
+					req.ParseForm()
+				}
+				if len(req.PostForm) > 0 {
+					query = req.PostForm
+					for k, _ := range query {
+						c.params[k] = query.Get(k)
+					}
+				}
+				if len(req.Form) > 0 {
+					query = req.Form
+					for k, _ := range query {
+						c.params[k] = query.Get(k)
+					}
 				}
 			}
 		}
