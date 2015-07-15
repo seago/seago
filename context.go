@@ -180,6 +180,12 @@ func (ctx *Context) GetParam(name string) Value {
 	return Value(ctx.params[name])
 }
 
+//判断http请求中GET POST PUT DELETE 等方法的参数以及路由规则中的参数是否存在
+func (ctx *Context) HasParam(name string) bool {
+	_, ok := ctx.params[name]
+	return ok
+}
+
 // GetFile returns information about user upload file by given form field name.
 func (ctx *Context) GetFile(name string) (multipart.File, *multipart.FileHeader, error) {
 	return ctx.Request.FormFile(name)
