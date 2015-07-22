@@ -24,12 +24,15 @@ import (
 	"strings"
 
 	"github.com/seago/com"
-
 	"github.com/seago/seago/inject"
+
+	"gopkg.in/ini.v1"
 )
 
+const _VERSION = "0.0.2.0722"
+
 func Version() string {
-	return "0.0.1"
+	return _VERSION
 }
 
 // Handler can be any callable function.
@@ -226,6 +229,8 @@ var (
 
 	// Flash applies to current request.
 	FlashNow bool
+	// Configuration convention object.
+	cfg *ini.File
 )
 
 func setENV(e string) {
@@ -241,4 +246,19 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// SetConfig sets data sources for configuration.
+func SetConfig(source interface{}, others ...interface{}) (_ *ini.File, err error) {
+	cfg, err = ini.Load(source, others...)
+	return Config(), err
+}
+
+// Config returns configuration convention object.
+// It returns an empty object if there is no one available.
+func Config() *ini.File {
+	if cfg == nil {
+		return ini.Empty()
+	}
+	return cfg
 }
