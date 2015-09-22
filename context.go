@@ -180,6 +180,10 @@ func (ctx *Context) GetParam(name string) Value {
 	return Value(ctx.params[name])
 }
 
+func (ctx *Context) SetParam(name, value string) {
+	ctx.params[name] = value
+}
+
 //判断http请求中GET POST PUT DELETE 等方法的参数以及路由规则中的参数是否存在
 func (ctx *Context) HasParam(name string) bool {
 	_, ok := ctx.params[name]
@@ -189,6 +193,18 @@ func (ctx *Context) HasParam(name string) bool {
 // GetFile returns information about user upload file by given form field name.
 func (ctx *Context) GetFile(name string) (multipart.File, *multipart.FileHeader, error) {
 	return ctx.Request.FormFile(name)
+}
+
+//获取多文件上传的文件信息
+func (ctx *Context) GetFiles(name string) ([]*multipart.FileHeader, bool) {
+	mf := ctx.Request.MultipartForm
+	if mf == nil {
+		return nil, false
+	}
+	if len(mf.File[name]) == 0 {
+		return nil, false
+	}
+	return mf.File[name], true
 }
 
 // SetCookie sets given cookie value to response header.
