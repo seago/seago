@@ -185,9 +185,9 @@ func (ctx *Context) SetParam(name, value string) {
 }
 
 //判断http请求中GET POST PUT DELETE 等方法的参数以及路由规则中的参数是否存在
-func (ctx *Context) HasParam(name string) bool {
-	_, ok := ctx.params[name]
-	return ok
+func (ctx *Context) HasParam(name string) (Value, bool) {
+	value, ok := ctx.params[name]
+	return value, ok
 }
 
 // GetFile returns information about user upload file by given form field name.
