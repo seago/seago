@@ -221,7 +221,7 @@ const (
 
 var (
 	// Env is the environment that Macaron is executing in.
-	// The MACARON_ENV is read on initialization to set this variable.
+	// The SEAGO_ENV is read on initialization to set this variable.
 	Env = DEV
 
 	// Path of work directory.
